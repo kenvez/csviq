@@ -4,8 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"charm.land/lipgloss/v2"
 	"github.com/kenvez/csviq/internal/csv"
 )
+
+var highlightStyle = lipgloss.NewStyle().
+	Background(lipgloss.Color("#3C3489")).
+	Foreground(lipgloss.Color("#EEEDFE"))
 
 func columnWidths(table *csv.Table) []int {
 	widths := make([]int, len(table.Columns))

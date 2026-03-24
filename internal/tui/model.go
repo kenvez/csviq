@@ -36,7 +36,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "ctrl+c", "q":
 			return m, tea.Quit
+
+		case "up", "k":
+			if m.cursorRow > 0 {
+				m.cursorRow--
+			}
+
+		case "down", "j":
+			if m.cursorRow < len(m.table.Rows)-1 {
+				m.cursorRow++
+			}
 		}
+
+	case tea.WindowSizeMsg:
+		m.width = msg.Width
+		m.height = msg.Height
 	}
 
 	return m, nil
@@ -59,8 +73,14 @@ func (m model) View() tea.View {
 
 	b.WriteString("\n")
 
-	for _, row := range m.table.Rows {
-		b.WriteString(renderRow(row, widths))
+	for i, row := range m.table.Rows {
+		line := renderRow(row, widths)
+
+		if i == m.cursorRow {
+			line = highlightStyle.Render(line)
+		}
+
+		b.WriteString(line)
 		b.WriteString("\n")
 	}
 
