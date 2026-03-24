@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	model := tui.InitialModel(table)
+	model := tui.InitialModel(table, path)
 	program := tea.NewProgram(model)
 
 	if _, err := program.Run(); err != nil {

@@ -9,6 +9,13 @@ import (
 	"github.com/kenvez/csviq/internal/csv"
 )
 
+type mode int
+
+const (
+	modeNormal mode = iota
+	modeEdit
+)
+
 type model struct {
 	table        *csv.Table
 	cursorRow    int
@@ -17,11 +24,15 @@ type model struct {
 	scrollY      int
 	width        int
 	height       int
+	mode         mode
+	editBuffer   string
+	path         string
 }
 
-func InitialModel(table *csv.Table) model {
+func InitialModel(table *csv.Table, path string) model {
 	return model{
 		table: table,
+		path:  path,
 	}
 }
 
@@ -31,47 +42,72 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-
 	case tea.KeyPressMsg:
-		switch msg.String() {
+		switch m.mode {
+		case modeNormal:
+			switch msg.String() {
 
-		case "ctrl+c", "q":
-			return m, tea.Quit
+			case "ctrl+c", "q":
+				return m, tea.Quit
 
-		case "up", "k":
-			if m.cursorRow > 0 {
-				m.cursorRow--
-				if m.cursorRow < m.scrollY {
-					m.scrollY--
+			case "ctrl+s":
+				m.table.SaveToFile(m.path)
+
+			case "up", "k":
+				if m.cursorRow > 0 {
+					m.cursorRow--
+					if m.cursorRow < m.scrollY {
+						m.scrollY--
+					}
 				}
-			}
 
-		case "down", "j":
-			if m.cursorRow < len(m.table.Rows)-1 {
-				m.cursorRow++
-				if m.cursorRow >= m.scrollY+m.visibleRows() {
-					m.scrollY++
+			case "down", "j":
+				if m.cursorRow < len(m.table.Rows)-1 {
+					m.cursorRow++
+					if m.cursorRow >= m.scrollY+m.visibleRows() {
+						m.scrollY++
+					}
 				}
+
+			case "left", "h":
+				if m.cursorColumn > 0 {
+					m.cursorColumn--
+				}
+
+			case "right", "l":
+				if m.cursorColumn < len(m.table.Columns)-1 {
+					m.cursorColumn++
+				}
+
+			case "g":
+				m.cursorRow = 0
+				m.scrollY = 0
+			case "G":
+				m.cursorRow = len(m.table.Rows) - 1
+
+				if m.cursorRow >= m.visibleRows() {
+					m.scrollY = m.cursorRow - m.visibleRows() + 1
+				}
+			case "e":
+				m.mode = modeEdit
+				m.editBuffer = m.table.Rows[m.cursorRow][m.cursorColumn]
 			}
 
-		case "left", "h":
-			if m.cursorColumn > 0 {
-				m.cursorColumn--
-			}
-
-		case "right", "l":
-			if m.cursorColumn < len(m.table.Columns)-1 {
-				m.cursorColumn++
-			}
-
-		case "g":
-			m.cursorRow = 0
-			m.scrollY = 0
-		case "G":
-			m.cursorRow = len(m.table.Rows) - 1
-
-			if m.cursorRow >= m.visibleRows() {
-				m.scrollY = m.cursorRow - m.visibleRows() + 1
+		case modeEdit:
+			switch msg.String() {
+			case "enter":
+				m.table.Rows[m.cursorRow][m.cursorColumn] = m.editBuffer
+				m.mode = modeNormal
+			case "escape":
+				m.mode = modeNormal
+			case "backspace":
+				if len(m.editBuffer) > 0 {
+					m.editBuffer = m.editBuffer[:len(m.editBuffer)-1]
+				}
+			case "space":
+				m.editBuffer += " "
+			default:
+				m.editBuffer += msg.String()
 			}
 		}
 
@@ -111,7 +147,13 @@ func (m model) View() tea.View {
 				line.WriteString("  ")
 			}
 
-			formatted := fmt.Sprintf("%-*s", widths[j], cell)
+			display := cell
+
+			if m.mode == modeEdit && i == m.cursorRow && j == m.cursorColumn {
+				display = m.editBuffer + "▎"
+			}
+
+			formatted := fmt.Sprintf("%-*s", widths[j], display)
 
 			if i == m.cursorRow && j == m.cursorColumn {
 				formatted = highlightStyle.Render(formatted)
