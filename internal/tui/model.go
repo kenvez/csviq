@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"strings"
 
 	tea "charm.land/bubbletea/v2"
@@ -53,6 +54,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
+		case "left", "h":
+			if m.cursorColumn > 0 {
+				m.cursorColumn--
+			}
+
+		case "right", "l":
+			if m.cursorColumn < len(m.table.Columns)-1 {
+				m.cursorColumn++
+			}
+
 		case "g":
 			m.cursorRow = 0
 			m.scrollY = 0
@@ -93,13 +104,23 @@ func (m model) View() tea.View {
 	end := min(start+m.visibleRows(), len(m.table.Rows))
 
 	for i := start; i < end; i++ {
-		line := renderRow(m.table.Rows[i], widths)
+		var line strings.Builder
 
-		if i == m.cursorRow {
-			line = highlightStyle.Render(line)
+		for j, cell := range m.table.Rows[i] {
+			if j > 0 {
+				line.WriteString("  ")
+			}
+
+			formatted := fmt.Sprintf("%-*s", widths[j], cell)
+
+			if i == m.cursorRow && j == m.cursorColumn {
+				formatted = highlightStyle.Render(formatted)
+			}
+
+			line.WriteString(formatted)
 		}
 
-		b.WriteString(line)
+		b.WriteString(line.String())
 		b.WriteString("\n")
 	}
 
