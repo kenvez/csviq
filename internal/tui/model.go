@@ -40,11 +40,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "up", "k":
 			if m.cursorRow > 0 {
 				m.cursorRow--
+				if m.cursorRow < m.scrollY {
+					m.scrollY--
+				}
 			}
 
 		case "down", "j":
 			if m.cursorRow < len(m.table.Rows)-1 {
 				m.cursorRow++
+				if m.cursorRow >= m.scrollY+m.visibleRows() {
+					m.scrollY++
+				}
 			}
 		}
 
@@ -73,8 +79,11 @@ func (m model) View() tea.View {
 
 	b.WriteString("\n")
 
-	for i, row := range m.table.Rows {
-		line := renderRow(row, widths)
+	start := m.scrollY
+	end := min(start+m.visibleRows(), len(m.table.Rows))
+
+	for i := start; i < end; i++ {
+		line := renderRow(m.table.Rows[i], widths)
 
 		if i == m.cursorRow {
 			line = highlightStyle.Render(line)
@@ -85,4 +94,8 @@ func (m model) View() tea.View {
 	}
 
 	return tea.NewView(b.String())
+}
+
+func (m model) visibleRows() int {
+	return m.height - 4
 }
