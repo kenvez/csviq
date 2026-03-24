@@ -52,6 +52,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.scrollY++
 				}
 			}
+
+		case "g":
+			m.cursorRow = 0
+			m.scrollY = 0
+		case "G":
+			m.cursorRow = len(m.table.Rows) - 1
+
+			if m.cursorRow >= m.visibleRows() {
+				m.scrollY = m.cursorRow - m.visibleRows() + 1
+			}
 		}
 
 	case tea.WindowSizeMsg:
