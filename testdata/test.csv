@@ -1,0 +1,16 @@
+id,name,department,role,salary,city,start_date
+1,Alice Chen,Engineering,Senior Developer,125000,Seattle,2019-03-15
+2,Bob Martinez,Marketing,Campaign Manager,85000,Austin,2021-07-01
+3,Clara Johansson,Engineering,Tech Lead,145000,Seattle,2017-11-20
+4,David Kim,Sales,Account Executive,78000,Chicago,2022-01-10
+5,Elena Popova,Engineering,Junior Developer,72000,Austin,2023-06-12
+6,Frank Nakamura,Design,UX Designer,95000,Portland,2020-09-05
+7,Grace Liu,Marketing,Content Strategist,82000,Chicago,2021-03-22
+8,Hassan Ali,Sales,Sales Director,130000,New York,2016-08-30
+9,Iris Okonkwo,Design,Product Designer,105000,Seattle,2019-12-01
+10,James Wright,Engineering,DevOps Engineer,118000,Portland,2020-04-17
+11,Kira Tanaka,Sales,Account Executive,76000,Austin,2023-02-28
+12,Liam O'Brien,Marketing,Marketing Director,140000,New York,2015-05-11
+13,Maya Patel,Engineering,Senior Developer,128000,Seattle,2018-10-03
+14,Noah Fischer,Design,Design Lead,135000,Portland,2017-06-25
+15,Olivia Santos,Sales,Account Manager,88000,Chicago,2021-11-14
