@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"charm.land/lipgloss/v2"
@@ -12,6 +13,9 @@ import (
 var highlightStyle = lipgloss.NewStyle().
 	Background(lipgloss.Color("#3C3489")).
 	Foreground(lipgloss.Color("#EEEDFE"))
+
+var statusBarStyle = lipgloss.NewStyle().
+	Foreground(lipgloss.Color("#87fc77"))
 
 func columnWidths(table *csv.Table) []int {
 	widths := make([]int, len(table.Columns))
@@ -43,4 +47,23 @@ func renderRow(cells []string, widths []int) string {
 	}
 
 	return b.String()
+}
+
+func renderStatusBar(m model) string {
+	var mode string
+
+	if m.mode == modeNormal {
+		mode = "NORMAL"
+	} else {
+		mode = "EDIT"
+	}
+
+	filename := filepath.Base(m.path)
+
+	return fmt.Sprintf(" %s | Row %d, Col %d | %s",
+		mode,
+		m.cursorRow+1,
+		m.cursorColumn+1,
+		filename,
+	)
 }

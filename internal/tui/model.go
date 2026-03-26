@@ -166,9 +166,12 @@ func (m model) View() tea.View {
 		b.WriteString("\n")
 	}
 
+	b.WriteString("\n")
+	b.WriteString(statusBarStyle.Render(renderStatusBar(m)))
+
 	return tea.NewView(b.String())
 }
 
 func (m model) visibleRows() int {
-	return m.height - 4
+	return m.height - 5
 }
